@@ -26,8 +26,8 @@ import (
 // Config holds all config vars
 type Config struct {
 	Addr      string        `long:"http_addr" default:"localhost:8080"  description:"Http listen address"`
-	Template  mulate.Config `group:"Template Options"`
 	DBConnect string        `long:"db_connect" default:"" description:"Database connect string, i.e. user:pass@host/dbname?sslmode=disable"`
+	Template  mulate.Config `group:"Template Options"`
 	PGFC      pgfc.Config   `group:"PGFC Options"`
 }
 
@@ -58,18 +58,13 @@ func main() {
 	templates.DisableCache(gin.IsDebugging())
 
 	allFuncs := template.FuncMap{}
-allFuncs["bool"] = func (a bool) string {
-if a {
-return "+"
-}
-return "-"
-}
+	appendFuncs(allFuncs)
+
 	s, err := pgfc.NewServer(cfg.PGFC, log, cfg.DBConnect)
 	if err != nil {
 		log.Fatal(err)
 	}
 	s.SetFuncBlank(allFuncs)
-	//	err = mlt.LoadTemplates(s.AppendFunc(allFuncs))
 	err = templates.LoadTemplates(allFuncs)
 	if err != nil {
 		log.Fatal(err)
