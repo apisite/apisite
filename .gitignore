@@ -1,2 +1,5 @@
 .env*
+vendor
+apisite
+dist
 

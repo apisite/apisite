@@ -31,6 +31,8 @@ type Config struct {
 	PGFC      pgfc.Config   `group:"PGFC Options"`
 }
 
+var version = "0.2-dev"
+
 func main() {
 
 	cfg := &Config{}
