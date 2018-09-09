@@ -1,0 +1,14 @@
+package: github.com/apisite/apisite
+import:
+- package: github.com/acoshift/paginate
+- package: github.com/apisite/gin-mulate
+- package: github.com/apisite/gin-pgfc
+- package: github.com/birkirb/loggers-mapper-logrus
+- package: github.com/gin-contrib/static
+- package: github.com/gin-gonic/gin
+- package: github.com/jessevdk/go-flags
+- package: github.com/onrik/logrus
+  subpackages:
+  - filename
+- package: github.com/sirupsen/logrus
+- package: github.com/spf13/cast
