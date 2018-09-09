@@ -6,22 +6,24 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/acoshift/paginate"
 	"github.com/spf13/cast"
 )
 
+// Page holds pagination functionality
 type Page struct {
-	ID          int    // Page number
-	IsCurrent   bool   // Is this a current page
-	IsFirst     bool   // Is it a first page
-	IsLast      bool   // Is it a last page
-	IsPrev      bool   // Is it 'prev' link
-	IsNext      bool   // 'last' link
-	SpaceBefore bool   // There is a space before this item
-	SpaceAfter  bool   // There is a space before this item
-	Href        string // Page href
+	ID      int64 // Page number
+	IsPrev  bool  // Is it a 'prev' link
+	IsNext  bool  // Is it a 'last' link
+	Allowed bool
+	Href    string // Page href
+
+	//	IsCurrent   bool // Is this a current page
+	//	IsFirst     bool // Is it a first page
+	//	IsLast      bool // Is it a last page
 }
 
-func valWithDefaultInt(args *url.Values, key string, valDefault int) int {
+func valWithDefaultInt64(args *url.Values, key string, valDefault int64) int64 {
 	a, ok := (*args)[key]
 	if !ok {
 		return valDefault
@@ -29,66 +31,42 @@ func valWithDefaultInt(args *url.Values, key string, valDefault int) int {
 	if len(a) == 0 {
 		return valDefault
 	}
-	return cast.ToInt(a[0])
+	return cast.ToInt64(a[0])
 }
 
-//
-func pager(args url.Values, count *interface{}, argPrefix string, rowsMax, blockLimit int) (*[]Page, error) {
-	itemCount := cast.ToInt(*count)
+// pager returns array with pagination links
+func pager(args url.Values, count *interface{}, argPrefix string, rowsMax, around, edge int64) *[]Page {
+	itemCount := cast.ToInt64(*count)
 
-	rowLimit := valWithDefaultInt(&args, argPrefix+"lim", rowsMax)
-	//rowOffset := valWithDefaultInt(&args, argPrefix+"off", 0)
+	rowLimit := valWithDefaultInt64(&args, argPrefix+"lim", rowsMax)
+	rowOffset := valWithDefaultInt64(&args, argPrefix+"off", 0)
 
-	pageCount := 0
-	if rowLimit > 0 {
-		pageCount = int(itemCount / rowLimit)
-		if itemCount%rowLimit > 0 {
-			pageCount++
-		}
+	pn := paginate.FromLimitOffset(rowLimit, rowOffset, itemCount)
+	pageCurrent := rowOffset/rowLimit + 1
+	p := []Page{}
+	p = append(p, Page{IsPrev: true, Allowed: pn.CanPrev(), ID: pn.Prev(), Href: ""})
+	for _, pi := range pn.Pages(around, edge) {
+		p = append(p, Page{Allowed: pi != pageCurrent, ID: pi, Href: ""})
+	}
+	p = append(p, Page{IsNext: true, Allowed: pn.CanNext(), ID: pn.Next(), Href: ""})
+
+	if rowLimit != rowsMax {
+		args.Set(argPrefix+"lim", cast.ToString(rowLimit))
+	} else {
+		args.Del(argPrefix + "lim")
 	}
 
-	pages := []Page{}
-	/*
-		max := pages - 1
-
-		prev := "#"
-		if pageNum == 1 {
-			prev = "../" + prefix + "/"
-		} else if pageNum > 1 {
-			prev = strconv.Itoa(pageNum - 1)
+	for i := range p {
+		if p[i].ID > 1 {
+			args.Set(argPrefix+"off", cast.ToString(rowLimit*(p[i].ID-1)))
+		} else {
+			args.Del(argPrefix + "off")
 		}
-		next := "#"
-		if pageNum < max {
-			next = strconv.Itoa(pageNum + 1)
-		}
-
-		// ------------------------
-		p := Pager{
-			Count:   pages,
-			Max:     max,
-			Current: pageNum,
-			Enabled: (pages > 0),
-			IsFirst: (pageNum == 0),
-			IsLast:  (pageNum == max),
-			Prev:    prev,
-			Next:    next,
-		}
-	*/
-	return &pages, nil
+		p[i].Href = "?" + args.Encode()
+	}
+	return &p
 }
 
-/*
-func pages(a string, def int) int {
-
-	q := req.URL.Query()
-	q.Add("api_key", "key_from_environment_or_flag")
-	q.Set("api_key", "foo & bar")
-	q.Del("api_key")
-	req.URL.RawQuery = q.Encode()
-
-	fmt.Println(req.URL.String())
-}
-*/
 func interator(min, max int) []int {
 	var ret []int
 	if max == 0 {
