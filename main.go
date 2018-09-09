@@ -60,7 +60,7 @@ func main() {
 	allFuncs := template.FuncMap{}
 	appendFuncs(allFuncs)
 
-	s, err := pgfc.NewServer(cfg.PGFC, log, cfg.DBConnect)
+	s, err := pgfc.NewServer(cfg.PGFC, log, cfg.DBConnect, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
