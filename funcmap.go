@@ -94,7 +94,7 @@ func atoi(a string, def int) int {
 
 }
 
-func appendFuncs(funcs template.FuncMap) {
+func initFuncs(funcs template.FuncMap) {
 	funcs["add"] = add
 	funcs["atoi"] = atoi
 	funcs["pager"] = pager
@@ -105,4 +105,8 @@ func appendFuncs(funcs template.FuncMap) {
 		}
 		return "-"
 	}
+	funcs["HTML"] = func(s string) template.HTML {
+		return template.HTML(s)
+	}
+
 }

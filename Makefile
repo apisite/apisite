@@ -15,6 +15,9 @@ clean:
 	rm -f ./apisite
 	rm -rf ./dist
 
+#test:
+#	go test -c -coverpkg=. -tags test
+
 vendor:
 	@echo "*** $@:glide ***"
 	which glide > /dev/null || curl https://glide.sh/get | sh
