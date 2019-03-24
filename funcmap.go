@@ -94,7 +94,9 @@ func atoi(a string, def int) int {
 
 }
 
-func initFuncs(funcs template.FuncMap) {
+// SetSimpleFuncs registers all prevoious funcs in given FuncMap
+// This is not used in templates
+func SetSimpleFuncs(funcs template.FuncMap) {
 	funcs["add"] = add
 	funcs["atoi"] = atoi
 	funcs["pager"] = pager

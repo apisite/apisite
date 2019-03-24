@@ -82,14 +82,14 @@ func (p *Meta) RedirectFound(uri string) (string, error) {
 	return "", ErrRedirect // TODO: Is there a way to pass status & title via error?
 }
 
-// SetFuncBlank appends function templates and not related to request functions to funcs
-func protoFuncs(funcs template.FuncMap) {
+// SetProtoFuncs appends function templates and not related to request functions to funcs
+func SetProtoFuncs(funcs template.FuncMap) {
 	funcs["request"] = func() interface{} { return nil }
 	funcs["param"] = func(key string) string { return "" }
 }
 
-// funcs which return real data inside request processing
-func requestFuncs(funcs template.FuncMap, ctx *gin.Context) {
+// SetRequestFuncs appends funcs which return real data inside request processing
+func SetRequestFuncs(funcs template.FuncMap, ctx *gin.Context) {
 	funcs["request"] = func() interface{} { return ctx.Request }
 	funcs["param"] = func(key string) string { return ctx.Param(key) }
 }

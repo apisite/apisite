@@ -76,14 +76,14 @@ func initRouter(cfg *Config, log loggers.Contextual) *gin.Engine {
 		log.Fatal(err)
 	}
 
-	s := ginpgcall.NewServer(log, caller)
+	api := ginpgcall.NewServer(log, caller)
 
 	// tpl2x
 
 	allFuncs := make(template.FuncMap, 0)
-	initFuncs(allFuncs)
-	protoFuncs(allFuncs)
-	s.SetFuncBlank(allFuncs)
+	SetSimpleFuncs(allFuncs)
+	SetProtoFuncs(allFuncs)
+	api.SetProtoFuncs(allFuncs)
 
 	//	gin.SetMode(gin.ReleaseMode)
 
@@ -97,8 +97,8 @@ func initRouter(cfg *Config, log loggers.Contextual) *gin.Engine {
 	}
 	gintpl := gintpl2x.New(log, tfs)
 	gintpl.RequestHandler = func(ctx *gin.Context, funcs template.FuncMap) gintpl2x.MetaData {
-		requestFuncs(funcs, ctx)
-		s.SetFuncRequest(funcs, ctx)
+		SetRequestFuncs(funcs, ctx)
+		api.SetRequestFuncs(funcs, ctx)
 		return &Meta{status: http.StatusOK, contentType: cfg.ContentType, layout: cfg.FS.DefLayout}
 	}
 
@@ -109,7 +109,7 @@ func initRouter(cfg *Config, log loggers.Contextual) *gin.Engine {
 		c.File("static/index.html")
 	})
 
-	s.Route("/rpc", r)
+	api.Route("/rpc", r)
 
 	return r
 }

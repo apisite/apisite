@@ -1,8 +1,11 @@
 //+build !test
 
+// This file holds code which does not need tests
+
 package main
 
-var version = "0.2-dev"
+// Actual version value is set during build
+var version = "0.0-dev"
 
 func main() {
 	cfg := initConfig()

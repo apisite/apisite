@@ -4,19 +4,16 @@ go 1.12
 
 replace (
 	github.com/apisite/pgcall => ../pgcall
+	github.com/apisite/pgcall/gin-pgcall => ../pgcall/gin-pgcall
 	github.com/apisite/pgcall/pgx-pgcall => ../pgcall/pgx-pgcall
 	github.com/apisite/tpl2x => ../tpl2x
 	github.com/apisite/tpl2x/gin-tpl2x => ../tpl2x/gin-tpl2x
-//	github.com/apisite/gin-mulate => ../gin-mulate
-//	github.com/apisite/pgcall/pgiface => ../pgcall/pgiface
-//	github.com/apisite/pgcall/pgx => ../pgcall/pgx
-
 )
 
 require (
 	github.com/acoshift/paginate v1.1.1
 	github.com/apisite/pgcall v0.0.0-00010101000000-000000000000
-	github.com/apisite/pgcall/gin-pgcall v0.0.0-20190323225239-0d4d947e5ca9
+	github.com/apisite/pgcall/gin-pgcall v0.0.0
 	github.com/apisite/pgcall/pgx-pgcall v0.0.0
 	github.com/apisite/tpl2x v0.0.0-20190323161051-eda7d2ca63fb
 	github.com/apisite/tpl2x/gin-tpl2x v0.0.0-00010101000000-000000000000
