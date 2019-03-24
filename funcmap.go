@@ -108,5 +108,10 @@ func initFuncs(funcs template.FuncMap) {
 	funcs["HTML"] = func(s string) template.HTML {
 		return template.HTML(s)
 	}
-
+	funcs["version"] = func() string {
+		return version
+	}
+	funcs["ref"] = func(a *interface{}) interface{} {
+		return *a
+	}
 }

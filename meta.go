@@ -5,7 +5,6 @@ import (
 	"github.com/pkg/errors"
 	"html/template"
 	"net/http"
-	"strings"
 )
 
 // ErrRedirect is an error returned when page needs to be redirected
@@ -27,6 +26,7 @@ type Meta struct {
 // Not for use in templates (see Raise)
 func (p *Meta) SetError(e error) {
 	p.error = e
+	p.status = http.StatusInternalServerError
 }
 
 func (p Meta) Error() error        { return p.error }
@@ -42,12 +42,8 @@ func (p *Meta) SetLayout(name string) (string, error) {
 }
 
 // SetTitle - set page title
-func (p *Meta) SetTitle(delim string, name ...string) (string, error) {
-	if len(name) > 0 {
-		p.Title = strings.Join(name, delim)
-	} else {
-		p.Title = delim
-	}
+func (p *Meta) SetTitle(name string) (string, error) {
+	p.Title = name
 	return "", nil
 }
 
