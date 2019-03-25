@@ -95,6 +95,7 @@ func initRouter(cfg *Config, log loggers.Contextual) *gin.Engine {
 	if err != nil {
 		log.Fatal(err)
 	}
+	tfs.ParseAlways(gin.IsDebugging())
 	gintpl := gintpl2x.New(log, tfs)
 	gintpl.RequestHandler = func(ctx *gin.Context, funcs template.FuncMap) gintpl2x.MetaData {
 		SetRequestFuncs(funcs, ctx)
