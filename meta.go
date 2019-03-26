@@ -12,21 +12,25 @@ var ErrRedirect = errors.New("Abort with redirect")
 
 // Meta holds page attributes
 type Meta struct {
-	Title       string
-	JS          []string
-	CSS         []string
-	contentType string
-	status      int
-	error       error
-	layout      string
-	location    string
+	Title        string
+	JS           []string
+	CSS          []string
+	contentType  string
+	status       int
+	error        error
+	errorMessage string
+	layout       string
+	location     string
 }
 
 // SetError sets error by template engine
 // Not for use in templates (see Raise)
 func (p *Meta) SetError(e error) {
 	p.error = e
-	p.status = http.StatusInternalServerError
+	if p.status == http.StatusOK {
+		// error status was not set
+		p.status = http.StatusInternalServerError
+	}
 }
 
 func (p Meta) Error() error        { return p.error }
@@ -34,6 +38,17 @@ func (p Meta) Layout() string      { return p.layout }
 func (p Meta) ContentType() string { return p.contentType }
 func (p Meta) Status() int         { return p.status }
 func (p Meta) Location() string    { return p.location }
+
+// ErrorMessage returns internal or template error
+func (p Meta) ErrorMessage() string {
+	if p.errorMessage != "" {
+		return p.errorMessage
+	}
+	if p.error == nil {
+		return ""
+	}
+	return p.error.Error()
+}
 
 // SetLayout - set page layout
 func (p *Meta) SetLayout(name string) (string, error) {
@@ -66,9 +81,9 @@ func (p *Meta) SetContentType(name string) (string, error) {
 }
 
 // Raise - abort template processing (if given) and raise error
-func (p *Meta) Raise(status int, title, message string, abort bool) (string, error) {
+func (p *Meta) Raise(status int, abort bool, message string) (string, error) {
 	p.status = status
-	p.Title = title
+	p.errorMessage = message // TODO: pass it via error only
 	if abort {
 		return "", errors.New(message)
 	}

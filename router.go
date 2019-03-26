@@ -32,6 +32,7 @@ type Config struct {
 	Addr        string `long:"http_addr" default:"localhost:8080"  description:"Http listen address"`
 	DBConnect   string `long:"db_connect" default:"" description:"Database connect string, i.e. user:pass@host/dbname?sslmode=disable"`
 	ContentType string `long:"content_type" default:"text/html; charset=utf-8" description:"Default content type"`
+	Error404    string `long:"error_404" default:".404" description:"Template called when page is not found"`
 	BufferSize  int    `long:"buffer_size" default:"64" description:"Template buffer size"`
 
 	FS  lookupfs.Config  `group:"Filesystem Options" namespace:"fs" env-namespace:"FS"`
@@ -90,7 +91,6 @@ func initRouter(cfg *Config, log loggers.Contextual) *gin.Engine {
 	r := gin.Default()
 
 	fs := lookupfs.New(cfg.FS)
-	// TODO:	templates.DisableCache(gin.IsDebugging())
 	tfs, err := tpl2x.New(cfg.BufferSize).Funcs(allFuncs).LookupFS(fs).Parse()
 	if err != nil {
 		log.Fatal(err)
@@ -107,7 +107,7 @@ func initRouter(cfg *Config, log loggers.Contextual) *gin.Engine {
 
 	r.Use(static.Serve("/", static.LocalFile("./static", false)))
 	r.NoRoute(func(c *gin.Context) {
-		c.File("static/index.html")
+		gintpl.HTML(c, cfg.Error404)
 	})
 
 	api.Route("/rpc", r)
