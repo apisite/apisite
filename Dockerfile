@@ -1,27 +1,22 @@
 
-FROM golang:1.11.5-alpine3.8
+FROM golang:1.12.1-alpine3.9
 
-#WORKDIR /go/src/github.com/apisite/apisite
 WORKDIR /opt/apisite
 RUN apk --update add curl git
 ADD . .
-#RUN curl https://glide.sh/get | sh
-#RUN glide install
 RUN go build ./...
-#RUN go install github.com/apisite/apisite
 
-FROM alpine:3.8
+FROM alpine:3.9
 
 MAINTAINER Aleksey Kovrizhkin <lekovr+apisite@gmail.com>
 
-ENV DOCKERFILE_VERSION  190125
+ENV DOCKERFILE_VERSION  190326
 
 # poma deps
 RUN apk --update add curl make coreutils diffutils gawk git openssl postgresql-client bash
 
 WORKDIR /opt/apisite
 
-#COPY --from=0 /go/bin/apisite /usr/bin/apisite
 COPY --from=0 /opt/apisite/apisite /usr/bin/apisite
 
 # apisite default port
