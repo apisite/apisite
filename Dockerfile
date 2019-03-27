@@ -4,7 +4,7 @@ FROM golang:1.12.1-alpine3.9
 WORKDIR /opt/apisite
 RUN apk --update add curl git
 ADD . .
-RUN go build ./...
+RUN go build -o apisite -ldflags "-X main.version=`git describe --tags`" *.go
 
 FROM alpine:3.9
 
