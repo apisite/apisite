@@ -8,7 +8,7 @@ RUN go build -o apisite -ldflags "-X main.version=`git describe --tags`" *.go
 
 FROM alpine:3.9
 
-MAINTAINER Aleksey Kovrizhkin <lekovr+apisite@gmail.com>
+MAINTAINER Aleksei Kovrizhkin <lekovr+apisite@gmail.com>
 
 ENV DOCKERFILE_VERSION  190326
 

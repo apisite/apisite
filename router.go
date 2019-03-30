@@ -100,7 +100,9 @@ func initRouter(cfg *Config, log loggers.Contextual) *gin.Engine {
 	gintpl.RequestHandler = func(ctx *gin.Context, funcs template.FuncMap) gintpl2x.MetaData {
 		SetRequestFuncs(funcs, ctx)
 		api.SetRequestFuncs(funcs, ctx)
-		return &Meta{status: http.StatusOK, contentType: cfg.ContentType, layout: cfg.FS.DefLayout}
+		m := NewMeta(http.StatusOK, cfg.ContentType)
+		m.SetLayout(cfg.FS.DefLayout)
+		return m
 	}
 
 	gintpl.Route("", r)
