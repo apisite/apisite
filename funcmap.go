@@ -23,8 +23,8 @@ type Page struct {
 	//	IsLast      bool // Is it a last page
 }
 
-func valWithDefaultInt64(args *url.Values, key string, valDefault int64) int64 {
-	a, ok := (*args)[key]
+func valWithDefaultInt64(args url.Values, key string, valDefault int64) int64 {
+	a, ok := args[key]
 	if !ok {
 		return valDefault
 	}
@@ -38,8 +38,8 @@ func valWithDefaultInt64(args *url.Values, key string, valDefault int64) int64 {
 func pager(args url.Values, count *interface{}, argPrefix string, rowsMax, around, edge int64) *[]Page {
 	itemCount := cast.ToInt64(*count)
 
-	rowLimit := valWithDefaultInt64(&args, argPrefix+"lim", rowsMax)
-	rowOffset := valWithDefaultInt64(&args, argPrefix+"off", 0)
+	rowLimit := valWithDefaultInt64(args, argPrefix+"lim", rowsMax)
+	rowOffset := valWithDefaultInt64(args, argPrefix+"off", 0)
 
 	pn := paginate.FromLimitOffset(rowLimit, rowOffset, itemCount)
 	pageCurrent := rowOffset/rowLimit + 1
