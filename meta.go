@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"html/template"
 
-	base "github.com/apisite/tpl2x/gin-tpl2x/samplemeta"
+	base "github.com/apisite/apitpl/ginapitpl/samplemeta"
 )
 
 // Meta holds template metadata

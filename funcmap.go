@@ -35,8 +35,8 @@ func valWithDefaultInt64(args url.Values, key string, valDefault int64) int64 {
 }
 
 // pager returns array with pagination links
-func pager(args url.Values, count *interface{}, argPrefix string, rowsMax, around, edge int64) *[]Page {
-	itemCount := cast.ToInt64(*count)
+func pager(args url.Values, count interface{}, argPrefix string, rowsMax, around, edge int64) *[]Page {
+	itemCount := cast.ToInt64(count)
 
 	rowLimit := valWithDefaultInt64(args, argPrefix+"lim", rowsMax)
 	rowOffset := valWithDefaultInt64(args, argPrefix+"off", 0)

@@ -4,12 +4,29 @@
 
 package main
 
-// Actual version value is set during build
+import (
+	"log"
+	"os"
+)
+
+// Actual version value will be set at build time
 var version = "0.0-dev"
 
 func main() {
-	cfg := initConfig()
-	log := initLog()
-	r := initRouter(cfg, log)
-	serve(log, cfg.Addr, r)
+	cfg, err := setupConfig()
+	if err != nil {
+		if err.Error() == "ERR1" {
+			os.Exit(1)
+		}
+		os.Exit(2)
+	}
+	l := setupLog()
+	r, err := setupRouter(cfg, l)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = runServer(l, cfg.Addr, r)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

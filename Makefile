@@ -3,6 +3,7 @@
 GO                 ?= go
 DIST_DIRS          := find * -type d -exec
 VERSION            ?= $(shell git describe --tags)
+SOURCES            ?= *.go
 
 build:
 	${GO} build -o apisite -ldflags "-X main.version=${VERSION}" *.go
@@ -42,5 +43,27 @@ dist: build-all
 	$(DIST_DIRS) tar -zcf apisite-${VERSION}-{}.tar.gz {} \; && \
 	$(DIST_DIRS) zip -r apisite-${VERSION}-{}.zip {} \; && \
 	cd ..
+
+# ------------------------------------------------------------------------------
+
+## run tests and fill coverage.out
+cov: coverage.out
+
+# internal target
+coverage.out: $(SOURCES)
+	$(GO) test -race -coverprofile=$@ -covermode=atomic -v ./...
+
+## open browser with coverage report
+cov-html: cov
+	$(GO) tool cover -html=coverage.out
+
+cov-clean:
+	rm -f coverage.*
+
+# Count lines of code (including tests)
+cloc:
+	cloc --by-file --not-match-f='(_mock_test.go|.sql|ml|Makefile|resource.go)$$' .
+
+# ------------------------------------------------------------------------------
 
 .PHONY: build install clean bootstrap-dist build-all dist
