@@ -1,3 +1,10 @@
+<p align="center">
+  <span>English</span> |
+  <a href="README.ru.md#apisite">Pусский</a>
+</p>
+
+---
+
 # apisite
 > Platform for websites with API which accessible from templates and external clients
 
