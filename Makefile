@@ -5,6 +5,48 @@ DIST_DIRS          := find * -type d -exec
 VERSION            ?= $(shell git describe --tags)
 SOURCES            ?= *.go
 
+# ------------------------------------------------------------------------------
+
+.PHONY: build install clean bootstrap-dist build-all dist
+
+##
+## Available make targets
+##
+
+# default: show target list
+all: help
+
+# ------------------------------------------------------------------------------
+## Sources
+
+## Format go sources
+fmt:
+	$(GO) fmt .
+
+## Run vet
+vet:
+	$(GO) vet .
+
+## Run linters
+lint:
+	golint .
+	golangci-lint run .
+
+## Run tests and fill coverage.out
+cov: coverage.out
+
+# internal target
+coverage.out: $(SOURCES)
+	$(GO) test -race -coverprofile=$@ -covermode=atomic -v .
+
+## Open coverage report in browser
+cov-html: cov
+	$(GO) tool cover -html=coverage.out
+
+## Clean coverage report
+cov-clean:
+	rm -f coverage.*
+
 build:
 	${GO} build -o apisite -ldflags "-X main.version=${VERSION}" *.go
 
@@ -19,15 +61,14 @@ clean:
 #test:
 #	go test -c -coverpkg=. -tags test
 
-vendor:
-	@echo "*** $@:glide ***"
-	which glide > /dev/null || curl https://glide.sh/get | sh
-	@echo "*** $@ ***"
-	glide install
+# ------------------------------------------------------------------------------
+## Deploy
 
+## Install gox
 bootstrap-dist:
 	${GO} get -u github.com/Masterminds/gox
 
+## Build dist binaries
 build-all:
 	gox -verbose \
 	-ldflags "-X main.version=${VERSION}" \
@@ -36,6 +77,7 @@ build-all:
 	-osarch="!darwin/arm64" \
 	-output="dist/{{.OS}}-{{.Arch}}/{{.Dir}}" .
 
+## Make all distributives
 dist: build-all
 	cd dist && \
 	$(DIST_DIRS) cp ../LICENSE {} \; && \
@@ -45,25 +87,14 @@ dist: build-all
 	cd ..
 
 # ------------------------------------------------------------------------------
+## Misc
 
-## run tests and fill coverage.out
-cov: coverage.out
+## Count lines of code (including tests) and update LOC.md
+cloc: LOC.md
 
-# internal target
-coverage.out: $(SOURCES)
-	$(GO) test -race -coverprofile=$@ -covermode=atomic -v ./...
+LOC.md: $(SOURCES)
+	cloc --by-file --md $(SOURCES) > $@
 
-## open browser with coverage report
-cov-html: cov
-	$(GO) tool cover -html=coverage.out
-
-cov-clean:
-	rm -f coverage.*
-
-# Count lines of code (including tests)
-cloc:
-	cloc --by-file --not-match-f='(_mock_test.go|.sql|ml|Makefile|resource.go)$$' .
-
-# ------------------------------------------------------------------------------
-
-.PHONY: build install clean bootstrap-dist build-all dist
+## List Makefile targets
+help:  Makefile
+	@grep -A1 "^##" $< | grep -vE '^--$$' | sed -E '/^##/{N;s/^## (.+)\n(.+):(.*)/\t\2:\1/}' | column -t -s ':'
