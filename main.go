@@ -2,13 +2,19 @@
 
 // This file holds code which does not covered by tests
 
-// Package main contains only app.Run(os.Exit) call
-// see https://github.com/apisite/apisite/app for details
 /*
+Package main contains only `app.Run(os.Exit)` call
+
+* see /github.com/apisite/apisite/app for details
+* app/
+* github.com/apisite/apisite/app
+
 apisite command has the following config options:
 
 $ ./apisite -h
-apisite v0.6.1-6-ga26c508. File web storage server
+
+apisite v0.6.1-6-ga26c508. API website engine
+
 Usage:
   apisite [OPTIONS]
 
@@ -57,6 +63,6 @@ var version = "0.0-dev"
 
 func main() {
 	app.Version = version
-	log.Printf("apisite %s. File web storage server", version)
+	log.Printf("apisite %s. API website engine", version)
 	app.Run(os.Exit)
 }
