@@ -3,17 +3,14 @@
 // This file holds code which does not covered by tests
 
 /*
-Package main contains only `app.Run(os.Exit)` call
+Package main contains only `app.Run(os.Exit)` call.
 
-* see /github.com/apisite/apisite/app for details
-* app/
-* github.com/apisite/apisite/app
+See https://godoc.org/github.com/apisite/apisite/app for details.
 
-apisite command has the following config options:
+Command options:
 
-$ ./apisite -h
-
-apisite v0.6.1-6-ga26c508. API website engine
+  $ ./apisite -h
+  apisite v0.6.1-6-ga26c508. API website engine
 
 Usage:
   apisite [OPTIONS]
