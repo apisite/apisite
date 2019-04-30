@@ -2,6 +2,8 @@
 
 // This file holds code which does not need tests
 
+// Package main contains only app.Run(os.Exit) call
+// see https://github.com/apisite/apisite/app for details
 package main
 
 import (
