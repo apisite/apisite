@@ -1,9 +1,11 @@
-package main
+// Package app implements apisite command functions
+package app
 
 import (
 	"context"
 	"github.com/pkg/errors"
 	"html/template"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -23,8 +25,9 @@ import (
 	"github.com/apisite/procapi/ginproc"
 
 	"github.com/apisite/procapi/pgtype"
-	_ "github.com/lib/pq"
+	//	_ "github.com/lib/pq"
 
+	"github.com/apisite/apisite/tplfunc"
 	"github.com/apisite/apitpl"
 	"github.com/apisite/apitpl/ginapitpl"
 	"github.com/apisite/apitpl/lookupfs"
@@ -41,28 +44,71 @@ type Config struct {
 	API procapi.Config  `group:"API Options" namespace:"api" env-namespace:"API"`
 }
 
+var (
+	// ErrGotHelp returned after showing requested help
+	ErrGotHelp = errors.New("help printed")
+	// ErrBadArgs returned after showing command args error message
+	ErrBadArgs = errors.New("option error printed")
+)
+
+// Version value will be set in main()
+var Version = "0.0-dev"
+
+// Run called by main() and prerforms all of app
+func Run(exitFunc func(code int)) {
+	var err error
+	var cfg *Config
+	defer func() { shutdown(exitFunc, err) }()
+	cfg, err = setupConfig()
+	if err != nil {
+		return
+	}
+	l := setupLog()
+	var r *gin.Engine
+	r, err = setupRouter(cfg, l)
+	if err != nil {
+		return
+	}
+	err = runServer(l, cfg.Addr, r)
+}
+
+// exit after deferred cleanups have run
+func shutdown(exitFunc func(code int), e error) {
+	if e != nil {
+		var code int
+		switch e {
+		case ErrGotHelp:
+			code = 3
+		case ErrBadArgs:
+			code = 2
+		default:
+			code = 1
+			log.Printf("Run error: %s", e.Error())
+		}
+		exitFunc(code)
+	}
+}
+
 func setupConfig() (*Config, error) {
 	cfg := &Config{}
 	p := flags.NewParser(cfg, flags.Default)
 	if _, err := p.Parse(); err != nil {
 		if e, ok := err.(*flags.Error); ok && e.Type == flags.ErrHelp {
-			return nil, errors.New("ERR1") //os.Exit(1) // help printed
-		} else {
-			return nil, errors.New("ERR2") //os.Exit(2) // error message written already
+			return nil, ErrGotHelp
 		}
+		return nil, ErrBadArgs
 	}
 	return cfg, nil
 }
 
+// setupLog creates logger
 func setupLog() loggers.Contextual {
 	l := logrus.New()
-
 	if gin.IsDebugging() {
 		l.SetLevel(logrus.DebugLevel)
 		l.SetReportCaller(true)
-		//l.AddHook(filename.NewHook())
 	}
-	return mapper.NewLogger(l)
+	return &mapper.Logger{Logger: l} // Same as mapper.NewLogger(l) but without info log message
 }
 
 func setupRouter(cfg *Config, log loggers.Contextual) (*gin.Engine, error) {
@@ -82,9 +128,11 @@ func setupRouter(cfg *Config, log loggers.Contextual) (*gin.Engine, error) {
 
 	// apitpl
 
-	allFuncs := make(template.FuncMap, 0)
-	SetSimpleFuncs(allFuncs)
-	SetProtoFuncs(allFuncs)
+	allFuncs := template.FuncMap{
+		"version": func() string { return Version },
+	}
+	tplfunc.SetSimpleFuncs(allFuncs)
+	tplfunc.SetProtoFuncs(allFuncs)
 	api.SetProtoFuncs(allFuncs)
 
 	//	gin.SetMode(gin.ReleaseMode)
@@ -99,9 +147,9 @@ func setupRouter(cfg *Config, log loggers.Contextual) (*gin.Engine, error) {
 	tfs.ParseAlways(gin.IsDebugging())
 	gintpl := ginapitpl.New(log, tfs)
 	gintpl.RequestHandler = func(ctx *gin.Context, funcs template.FuncMap) ginapitpl.MetaData {
-		SetRequestFuncs(funcs, ctx)
+		tplfunc.SetRequestFuncs(funcs, ctx)
 		api.SetRequestFuncs(funcs, ctx)
-		m := NewMeta(http.StatusOK, cfg.ContentType)
+		m := tplfunc.NewMeta(http.StatusOK, cfg.ContentType)
 		m.SetLayout(cfg.FS.DefLayout)
 		return m
 	}
@@ -113,7 +161,7 @@ func setupRouter(cfg *Config, log loggers.Contextual) (*gin.Engine, error) {
 		gintpl.HTML(c, cfg.Error404)
 	})
 
-	api.Route("/rpc", r)
+	api.Route("/rpc", r) // nolint: errcheck
 
 	return r, nil
 }
@@ -134,7 +182,7 @@ func runServer(log loggers.Contextual, addr string, r *gin.Engine) error {
 
 	// Wait for interrupt signal to gracefully shutdown the server with
 	// a timeout of 5 seconds.
-	quit := make(chan os.Signal)
+	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
 	log.Println("Shutdown Server ...")

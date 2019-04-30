@@ -1,4 +1,4 @@
-package main
+package tplfunc
 
 import (
 	//	"fmt"
@@ -34,8 +34,8 @@ func valWithDefaultInt64(args url.Values, key string, valDefault int64) int64 {
 	return cast.ToInt64(a[0])
 }
 
-// pager returns array with pagination links
-func pager(args url.Values, count interface{}, argPrefix string, rowsMax, around, edge int64) *[]Page {
+// Pager returns array with pagination links
+func Pager(args url.Values, count interface{}, argPrefix string, rowsMax, around, edge int64) *[]Page {
 	itemCount := cast.ToInt64(count)
 
 	rowLimit := valWithDefaultInt64(args, argPrefix+"lim", rowsMax)
@@ -95,11 +95,11 @@ func atoi(a string, def int) int {
 }
 
 // SetSimpleFuncs registers all prevoious funcs in given FuncMap
-// This is not used in templates
+// This func is not for use in templates
 func SetSimpleFuncs(funcs template.FuncMap) {
 	funcs["add"] = add
 	funcs["atoi"] = atoi
-	funcs["pager"] = pager
+	funcs["pager"] = Pager
 	funcs["interator"] = interator
 	funcs["bool"] = func(a bool) string {
 		if a {
@@ -109,9 +109,6 @@ func SetSimpleFuncs(funcs template.FuncMap) {
 	}
 	funcs["HTML"] = func(s string) template.HTML {
 		return template.HTML(s)
-	}
-	funcs["version"] = func() string {
-		return version
 	}
 	funcs["ref"] = func(a *interface{}) interface{} {
 		return *a

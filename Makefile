@@ -3,7 +3,7 @@
 GO                 ?= go
 DIST_DIRS          := find * -type d -exec
 VERSION            ?= $(shell git describe --tags)
-SOURCES            ?= *.go
+SOURCES            ?= *.go */*.go
 
 # ------------------------------------------------------------------------------
 
@@ -21,23 +21,23 @@ all: help
 
 ## Format go sources
 fmt:
-	$(GO) fmt .
+	$(GO) fmt ./...
 
 ## Run vet
 vet:
-	$(GO) vet .
+	$(GO) vet ./...
 
 ## Run linters
 lint:
-	golint .
-	golangci-lint run .
+	golint ./...
+	golangci-lint run ./...
 
 ## Run tests and fill coverage.out
 cov: coverage.out
 
 # internal target
 coverage.out: $(SOURCES)
-	$(GO) test -race -coverprofile=$@ -covermode=atomic -v .
+	GIN_MODE=release $(GO) test -test.v -test.race -coverprofile=$@ -covermode=atomic -tags test ./...
 
 ## Open coverage report in browser
 cov-html: cov
@@ -48,7 +48,7 @@ cov-clean:
 	rm -f coverage.*
 
 build:
-	${GO} build -o apisite -ldflags "-X main.version=${VERSION}" *.go
+	${GO} build -o apisite -ldflags "-X main.version=${VERSION}"
 
 install: build
 	install -d ${DESTDIR}/usr/local/bin/

@@ -1,4 +1,4 @@
-package main
+package tplfunc
 
 import (
 	"github.com/pkg/errors"
