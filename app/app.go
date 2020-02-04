@@ -24,9 +24,6 @@ import (
 	"github.com/apisite/procapi"
 	"github.com/apisite/procapi/ginproc"
 
-	"github.com/apisite/procapi/pgtype"
-	//	_ "github.com/lib/pq"
-
 	"github.com/apisite/apisite/tplfunc"
 	"github.com/apisite/apitpl"
 	"github.com/apisite/apitpl/ginapitpl"
@@ -115,7 +112,7 @@ func setupRouter(cfg *Config, log loggers.Contextual) (*gin.Engine, error) {
 
 	// procapi
 
-	db := procapi.New(cfg.API, log, nil).SetMarshaller(pgtype.New())
+	db := procapi.New(cfg.API, log, nil)
 	err := db.Open()
 	if err != nil {
 		return nil, err
