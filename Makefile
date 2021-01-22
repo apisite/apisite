@@ -37,7 +37,7 @@ cov: coverage.out
 
 # internal target
 coverage.out: $(SOURCES)
-	GIN_MODE=release $(GO) test -test.v -test.race -coverprofile=$@ -covermode=atomic -tags test ./...
+	GIN_MODE=release $(GO) test -test.v -coverprofile=$@ -covermode=atomic -tags test ./...
 
 ## Open coverage report in browser
 cov-html: cov
