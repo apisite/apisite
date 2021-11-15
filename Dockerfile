@@ -5,7 +5,7 @@ FROM ghcr.io/dopos/golang-alpine:v1.16.10-alpine3.14.3
 WORKDIR /opt/apisite
 RUN apk --update add curl git
 ADD . .
-RUN go build -o apisite -ldflags "-X main.version=`git describe --tags`" *.go
+RUN go build -o apisite -ldflags "-X main.version=`git describe --tags --always`" *.go
 
 #FROM alpine:3.9
 FROM ghcr.io/dopos/docker-alpine:v3.14.3
