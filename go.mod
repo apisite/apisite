@@ -1,6 +1,6 @@
 module github.com/apisite/apisite
 
-go 1.12
+go 1.16
 
 require (
 	github.com/acoshift/paginate v1.1.1

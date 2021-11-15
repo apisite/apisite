@@ -1,12 +1,14 @@
 
-FROM golang:1.12.1-alpine3.9
+#FROM golang:1.12.1-alpine3.9
+FROM ghcr.io/dopos/golang-alpine:v1.16.10-alpine3.14.2
 
 WORKDIR /opt/apisite
 RUN apk --update add curl git
 ADD . .
 RUN go build -o apisite -ldflags "-X main.version=`git describe --tags`" *.go
 
-FROM alpine:3.9
+#FROM alpine:3.9
+FROM ghcr.io/dopos/docker-alpine:v3.14.2
 
 MAINTAINER Aleksei Kovrizhkin <lekovr+apisite@gmail.com>
 
