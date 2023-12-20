@@ -3,6 +3,8 @@
 GO                 ?= go
 DIST_DIRS          := find * -type d -exec
 VERSION            ?= $(shell git describe --tags)
+# Last project tag (used in `make changelog`)
+RELEASE            ?= $(shell git describe --tags --abbrev=0 --always)
 SOURCES            ?= *.go */*.go
 
 # ------------------------------------------------------------------------------
@@ -60,6 +62,12 @@ clean:
 
 #test:
 #	go test -c -coverpkg=. -tags test
+
+## Changes from last tag
+changelog:
+	@echo Changes since $(RELEASE)
+	@echo
+	@git log $(RELEASE)..@ --pretty=format:"* %s"
 
 # ------------------------------------------------------------------------------
 ## Deploy
