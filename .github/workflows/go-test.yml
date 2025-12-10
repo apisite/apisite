@@ -1,4 +1,6 @@
 name: GoTest
+permissions:
+  contents: read
 
 on:
   push:
