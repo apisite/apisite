@@ -108,7 +108,7 @@ func SetSimpleFuncs(funcs template.FuncMap) {
 		return "-"
 	}
 	funcs["HTML"] = func(s string) template.HTML {
-		return template.HTML(s)
+		return template.HTML(s) //nolint:gosec // G203: This string created in our template.
 	}
 	funcs["ref"] = func(a *interface{}) interface{} {
 		return *a

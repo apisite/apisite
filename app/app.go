@@ -32,10 +32,13 @@ import (
 
 // Config holds all config vars
 type Config struct {
-	Addr        string `long:"http_addr" default:"localhost:8080"  description:"Http listen address"`
-	ContentType string `long:"content_type" default:"text/html; charset=utf-8" description:"Default content type"`
-	Error404    string `long:"error_404" default:".404" description:"Template called when page is not found"`
-	BufferSize  int    `long:"buffer_size" default:"64" description:"Template buffer size"`
+	Addr           string        `long:"http_addr" default:"localhost:8080"  description:"Http listen address"`
+	ContentType    string        `long:"content_type" default:"text/html; charset=utf-8" description:"Default content type"`
+	Error404       string        `long:"error_404" default:".404" description:"Template called when page is not found"`
+	BufferSize     int           `long:"buffer_size" default:"64" description:"Template buffer size"`
+	MaxHeaderBytes int           `long:"maxheader" description:"MaxHeaderBytes"`
+	ReadTimeout    time.Duration `long:"rto" default:"10s" description:"HTTP read timeout"`
+	WriteTimeout   time.Duration `long:"wto" default:"60s" description:"HTTP write timeout"`
 
 	FS  lookupfs.Config `group:"Filesystem Options" namespace:"fs" env-namespace:"FS"`
 	API procapi.Config  `group:"API Options" namespace:"api" env-namespace:"API"`
@@ -66,7 +69,7 @@ func Run(exitFunc func(code int)) {
 	if err != nil {
 		return
 	}
-	err = runServer(l, cfg.Addr, r)
+	err = runServer(l, cfg, r)
 }
 
 // exit after deferred cleanups have run
@@ -158,16 +161,21 @@ func setupRouter(cfg *Config, log loggers.Contextual) (*gin.Engine, error) {
 		gintpl.HTML(c, cfg.Error404)
 	})
 
-	api.Route("/rpc", r) // nolint: errcheck
+	if err = api.Route("/rpc", r); err != nil {
+		return nil, err
+	}
 
 	return r, nil
 }
 
-func runServer(log loggers.Contextual, addr string, r *gin.Engine) error {
+func runServer(log loggers.Contextual, cfg *Config, r *gin.Engine) error {
 
 	srv := &http.Server{
-		Addr:    addr,
-		Handler: r,
+		Addr:           cfg.Addr,
+		Handler:        r,
+		ReadTimeout:    cfg.ReadTimeout,
+		WriteTimeout:   cfg.WriteTimeout,
+		MaxHeaderBytes: cfg.MaxHeaderBytes,
 	}
 
 	go func() {
